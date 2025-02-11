@@ -7,6 +7,7 @@ import altair as alt
 
 st.title('📊 Expense Tracker & Finance Manager')
 st.write("This app allows you to track your expenses and manage your finances efficiently. 💸")
+st.write("Ask questions about your csv data")
 
 
 
@@ -86,7 +87,7 @@ for message in st.session_state.messages:
         st.markdown(message["content"])
 
 # React to user input
-if prompt := st.chat_input("What is up?"):
+if prompt := st.chat_input("Lets analyse your csv data!"):
     # Display user message in chat message container
     st.chat_message("user").markdown(prompt)
     # Add user message to chat history

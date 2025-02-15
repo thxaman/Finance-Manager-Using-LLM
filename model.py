@@ -13,7 +13,7 @@ class Model(object):
         self.agent = None
         self.memory = ConversationBufferMemory(return_messages=True)
         self.llm = ChatGroq(
-            temperature=0, # confidence of model
+            temperature=0.1, # confidence of model
             model="llama-3.3-70b-versatile",
             api_key=os.getenv("API_KEY_"),
             # api_key=st.secrets["API_KEY"]
@@ -31,15 +31,15 @@ class Model(object):
         if self.agent is None:
     
             sequence_chain = prompt | self.llm.with_structured_output(Config)
-            conversation_history = self.memory.load_memory_variables({})["history"]
-            full_prompt = f"{conversation_history}\nUser: {message}\nAssistant:"
+            # conversation_history = self.memory.load_memory_variables({})["history"]
+            full_prompt = f"{history}\nUser: {message}\nAssistant:"
             data = {"user_message":full_prompt,}
 
             print("chat initiated")
             response = sequence_chain.invoke(data)
             print("resp initiated")
             
-            self.memory.save_context({"user_message": message}, {"assistant": response.msg})
+            # self.memory.save_context({"user_message": message}, {"assistant": response.msg})
             self.add_context(message,response.msg)
             return response.msg
         else:
@@ -47,7 +47,7 @@ class Model(object):
         
             # conversation_history = self.memory.load_memory_variables({})["history"]
             full_prompt = f"{history}\nUser: {message}\nAssistant:"
-            print(full_prompt)
+            
             data = {"user_message":full_prompt,}
 
             print("chat initiated")

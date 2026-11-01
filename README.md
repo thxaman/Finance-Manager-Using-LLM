@@ -31,6 +31,24 @@ the charts, and ask questions about your data in plain English.
   - API keys read from environment variables or Streamlit secrets
   - Full CSV stays local; only a compact, computed brief is sent when you chat
 
+## 📸 Screenshots
+
+**Upload and overview**
+
+![Upload page with a sample CSV loaded and KPI cards](assets/screenshots/upload.png)
+
+**Dashboard**
+
+![Spending by category and assets versus liabilities charts](assets/screenshots/dashboard.png)
+
+**Finance chat**
+
+![Suggested finance questions in the chat interface](assets/screenshots/chat-suggestions.png)
+
+**Example conversation**
+
+![The assistant answering a question about Indian tax laws](assets/screenshots/chat-response.png)
+
 ## 🧱 Tech stack
 
 | Layer | Technology |
@@ -155,6 +173,7 @@ test.py             Interactive terminal chat
 test_data.py        Data-layer unit tests
 test_model.py       Assistant/history unit tests
 test_app.py         Streamlit integration tests
+assets/screenshots/ README screenshots
 Sample.csv          Example dataset
 .env.example        Example configuration
 ```

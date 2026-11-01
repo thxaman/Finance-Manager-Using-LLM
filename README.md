@@ -1,92 +1,187 @@
-# 💼👨‍💼 Finance Manager Bot
+# 💼 Finance Manager Bot
 
-A Finance Manager Bot built using LangChain and an LLM model to help manage your finances efficiently.
+An AI-powered personal finance dashboard built with **Streamlit**, **Pandas** and
+**Groq** (via the official Groq SDK). Upload a CSV of expenses, assets or liabilities, explore
+the charts, and ask questions about your data in plain English.
 
-## Table of Contents
-
-- [📜 Introduction](#introduction)
-- [✨ Features](#features)
-- [⚙️ Installation](#installation)
-- [🚀 Usage](#usage)
-- [📸 Screenshots](#screenshots)
-- [📜 License](#license)
-- [📬 Contact](#contact)
-
-## 📜 Introduction
-
-Welcome to the Finance Manager Bot! This bot is designed to assist users in managing their finances by leveraging the power of LangChain and a Large Language Model (LLM). It can track expenses, generate financial reports, provide budget recommendations, and much more.
----
-Deployment Link: https://finance-manager-using-llm.streamlit.app/
----
+> Deployment: https://finance-manager-using-llm.streamlit.app/
+>
+> The live deployment may lag behind the current version of this repository.
 
 ## ✨ Features
 
-- 📊 Expense tracking and categorization
-- 📈 Budget management and recommendations
-- 📝 Financial report generation
-- 📂 **CSV File Analysis**: Answer questions based on uploaded CSV files containing financial data (expenses, assets, etc.)
+- 📂 **CSV upload** with automatic cleaning
+  - Case-insensitive column detection
+  - Currency strings such as `$1,200.50`, commas and `(120)` negatives
+  - Date parsing, blank-row removal and encoding fallbacks
+- 📊 **Dashboard**
+  - Spending by category
+  - Assets vs liabilities
+  - Monthly spending trend (when a date column is present)
+  - KPI cards for spending, assets, liabilities and net worth
+  - Downloadable cleaned data
+- 🤖 **Finance chat**
+  - Streaming responses
+  - Conversation memory stored per session
+  - Works with or without an uploaded CSV
+  - Uses a compact, computed dataset brief instead of executing model-generated Python
+- 🔒 **Safer by design**
+  - No `create_csv_agent`, no arbitrary code execution
+  - Direct Groq SDK integration instead of private LangChain internals
+  - API keys read from environment variables or Streamlit secrets
+  - Full CSV stays local; only a compact, computed brief is sent when you chat
+
+## 🧱 Tech stack
+
+| Layer | Technology |
+| --- | --- |
+| UI | Streamlit |
+| Data | Pandas |
+| Charts | Altair |
+| LLM | Groq (`openai/gpt-oss-120b` by default) |
+| LLM integration | Official Groq Python SDK (`groq`) |
 
 ## ⚙️ Installation
 
-1. Clone the repository:
-    ```bash
-    git clone https://github.com/thxaman/Finance-Manager-Using-LLM
-    ```
+Requirements: **Python 3.10+** (3.11 or newer recommended).
 
-2. Install dependencies:
-    ```bash
-    pip install -r requirements.txt
-    ```
+```bash
+git clone https://github.com/thxaman/Finance-Manager-Using-LLM
+cd Finance-Manager-Using-LLM
 
-3. Create a `.env` file with your API keys:
-    ```
-    API_KEY_=your_api_key
-    ```
+python -m venv .venv
+# Windows:
+.venv\Scripts\activate
+# macOS/Linux:
+source .venv/bin/activate
 
-4. Run the app:
-    ```bash
-    streamlit run streamlit_app.py
-    ```
+pip install -r requirements.txt
+```
 
+Create a `.env` file in the project root:
+
+```env
+GROQ_API_KEY=your_groq_api_key_here
+```
+
+Get a free API key from [console.groq.com/keys](https://console.groq.com/keys).
+An example file is provided at `.env.example`.
+
+### Optional configuration
+
+| Variable | Default | Purpose |
+| --- | --- | --- |
+| `GROQ_MODEL` | `openai/gpt-oss-120b` | Groq model ID |
+| `GROQ_TEMPERATURE` | `0.2` | Response randomness |
+| `CURRENCY_SYMBOL` | `$` | Symbol used in the dashboard and prompts |
+| `MAX_HISTORY_MESSAGES` | `16` | Chat messages sent back to the model |
+| `MAX_CONTEXT_CHARS` | `14000` | Maximum size of the dataset brief |
+| `MAX_UPLOAD_MB` | `25` | Maximum CSV upload size |
+
+Legacy `API_KEY_` and `API_KEY` environment variables are still read, so old
+deployments continue to work.
+
+### Streamlit secrets
+
+For Streamlit Community Cloud, add this to `.streamlit/secrets.toml` (or the app's
+secrets editor) instead of using `.env`:
+
+```toml
+GROQ_API_KEY = "your_groq_api_key_here"
+```
 
 ## 🚀 Usage
-Here are some example commands you can use with the Finance Manager Bot:
 
-  -Track an expense:
+```bash
+streamlit run streamlit_app.py
+# or
+streamlit run app.py
+```
 
-  ``` track expense 50.75 Grocery ```
+Then:
 
-  -Get budget recommendation:
+1. Upload a CSV (or download `Sample.csv` from the sidebar and upload it).
+2. Explore the overview and data tabs.
+3. Ask questions in the chat, for example:
+   - “Give me an overall analysis of my finances.”
+   - “What is my biggest expense category?”
+   - “What is my asset-to-liability ratio?”
+   - “How can I reduce my monthly spending?”
 
-  ``` recommend a budget for 25 year old ```
+### CSV format
 
-  -Ask trivial economy related questions:
+`Category` and `Amount` are enough for the spending chart. Everything else is
+optional:
 
-  ``` how inflation affects my investments or savings?  ```
+```csv
+Category,Amount,Date,Assets,Liabilities
+Groceries,150,2025-01-05,150000,90000
+Rent,1000,2025-01-06,,
+Utilities,200,2025-01-07,,
+```
 
-  -Ask questions based on csv data :
+Column matching is case-insensitive and also recognises common aliases such as
+`Expense`, `Cost`, `Type`, `Transaction Date`, `Debt`, etc.
 
-  ``` whats my highest expense? ```
+## 💻 Command-line chat
 
-  ``` whats my asset to liability ratio ```
+A small CLI is included for quick testing without Streamlit:
 
-  ``` give a overall analysis of my data ```
+```bash
+python test.py Sample.csv
+```
 
-## 📸 Screenshots
-![Screenshot 2025-02-15 202934](https://github.com/user-attachments/assets/3cc94228-dfe1-464a-b091-bd4721315c82)
-![Screenshot 2025-02-15 203036](https://github.com/user-attachments/assets/9c6d3b2b-5ff6-4654-b05e-87156116a7bc)
-![Screenshot 2025-02-15 203048](https://github.com/user-attachments/assets/e6ae5b85-fe8e-4bfe-a17f-9831b51a0fa8)
-![Screenshot 2025-02-15 203103](https://github.com/user-attachments/assets/33fab17d-0add-4b0a-8824-a98f0a3bea04)
-![Screenshot 2025-02-15 202904](https://github.com/user-attachments/assets/b131062f-ba12-43d4-bca6-d63057f10a77)
+Type `/clear` to reset the conversation and `/quit` to exit.
+
+Run the tests without an API key:
+
+```bash
+python -m unittest discover -v
+```
+
+`test_data.py` covers CSV cleaning and totals; `test_model.py` covers message
+history and streaming with a fake provider; `test_app.py` runs the Streamlit app
+through `AppTest` with a fake model, so no network calls are made.
+
+## 📁 Project structure
+
+```text
+app.py              Streamlit UI and dashboard
+streamlit_app.py    Backwards-compatible entry point
+model.py            Groq finance assistant and streaming client
+data.py             CSV cleaning, summaries and dataset briefs
+config.py           Settings, API-key handling and prompts
+test.py             Interactive terminal chat
+test_data.py        Data-layer unit tests
+test_model.py       Assistant/history unit tests
+test_app.py         Streamlit integration tests
+Sample.csv          Example dataset
+.env.example        Example configuration
+```
+
+## 🔧 Troubleshooting
+
+- **“No Groq API key found”** — check that `.env` exists in the project root (the
+  file is git-ignored) or configure `GROQ_API_KEY` in Streamlit secrets.
+- **Model not found / access denied** — set `GROQ_MODEL` to a model enabled for
+  your Groq account. The default `openai/gpt-oss-120b` is a production model.
+- **CSV columns not detected** — rename columns to `Category`, `Amount`, `Date`,
+  `Assets` or `Liabilities`, or use one of the supported aliases.
+- **Currency looks wrong** — set `CURRENCY_SYMBOL` (for example `₹`, `€` or `£`).
+
+## 🔐 Security
+
+- Never commit `.env` or Streamlit secrets. Both are ignored by `.gitignore`.
+- If a key has ever been committed or shared, revoke it in the Groq console and
+  create a new one.
+- The assistant receives a compact dataset brief (totals, column summaries and a
+  few sample rows), not the full file.
 
 ## 📜 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License — see the [LICENSE](LICENSE) file
+for details.
 
 ## 📬 Contact
 
-For any questions, feel free to reach out:
-
 - **Aman Singh**: [amansingh010405@gmail.com](mailto:amansingh010405@gmail.com)
-
-
